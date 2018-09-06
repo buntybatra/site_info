@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ * Alter site information form to add new field.
+ */
+function site_info_form_system_site_information_settings_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+
+  // Get config and editable config obj.
+  $config = \Drupal::config('system.site');
+  $editable = \Drupal::configFactory()->getEditable('system.site');
+
+  // If there is no key present add one.
+  if(!$config->get('siteapikey')) {
+    $editable->set('siteapikey', 'No API Key yet')->save();
+  }
+
+  // Create custom site api key field.
+  $form['site_api'] = [
+    '#type' => 'details',
+    '#title' => 'Site API key',
+    '#open' => TRUE,
+    'field_site_api' => [
+      '#type' => 'textfield',
+      '#title' => 'Site API Key',
+      '#description' => 'Here you can provide site api key',
+      '#default_value' => $config->get('siteapikey')
+    ]
+
+  ];
+
+  // Update submit button label on the base of siteapikey.
+  if($config->get('siteapikey') != 'No API Key yet') {
+    $form['actions']['submit']['#value'] = t('Update Configuration');
+  }
+
+  // Add custom submit handler.
+  $form['#submit'][] = '_update_site_api';
+
+}
+
+/**
+ * Custom function to handle site info form submit.
+ * This function update site api key.
+ */
+
+function _update_site_api($form, \Drupal\Core\Form\FormStateInterface $form_state) {
+
+  // Get config and editable config obj.
+  $api_key = $form_state->getValue('field_site_api');
+  $editable = \Drupal::configFactory()->getEditable('system.site');
+
+  // Update siteapikey.
+  if($api_key != 'No API Key yet') {
+    $editable->set('siteapikey', $api_key)->save();
+  }
+}

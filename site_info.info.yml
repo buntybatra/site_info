@@ -1,0 +1,8 @@
+name: Custom site info
+type: module
+description: Allow to add site api key.
+package: site info
+dependencies:
+  - drupal:node
+  - serialization
+core: '8.x'
